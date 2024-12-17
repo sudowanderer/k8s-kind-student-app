@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: frontend-html
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: frontend-html
+          hostPath:
+            path: /mnt/frontend  # Kind 控制平面容器内的路径
+            type: Directory
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  ports:
+    - port: 80         # 服务端口
+      targetPort: 80   # Pod 中的容器端口
+  selector:
+    app: frontend
+  type: ClusterIP      # 仅暴露在集群内
